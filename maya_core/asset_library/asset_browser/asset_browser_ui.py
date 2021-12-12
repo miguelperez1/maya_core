@@ -1,5 +1,6 @@
-import logging
+import os
 from functools import partial
+import logging
 
 from PySide2 import QtCore
 from PySide2 import QtWidgets
@@ -16,16 +17,19 @@ logger = logging.getLogger(__name__)
 logger.setLevel(10)
 
 
-class ExampleDialog(QtWidgets.QMainWindow):
+class AssetBrowserWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=MWidgets.maya_main_window()):
-        super(ExampleDialog, self).__init__(parent)
+        super(AssetBrowserWindow, self).__init__(parent)
 
-        self.setWindowTitle("Window")
+        self.setWindowTitle("Asset Browser")
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
 
-        self.setObjectName("ExampleDialog")
+        self.setObjectName("AssetBrowserWindow")
 
         self.prefs_directory = cmds.internalVar(userPrefDir=True)
+
+        self.dims = (1920, 1080)
+        self.setMinimumSize(self.dims[0], self.dims[1])
 
         self.create_actions()
         self.create_widgets()
@@ -43,39 +47,33 @@ class ExampleDialog(QtWidgets.QMainWindow):
             if not lm.get_library_data(library):
                 continue
 
-            self.custom_actions[library] = {}
+            self.custom_actions[library] = []
 
-        # Model library custom actions
-        model_action = QtWidgets.QAction("This is model")
-        material_action = QtWidgets.QAction("This is mtl")
-        after_action = QtWidgets.QAction("after")
+        self.import_action = QtWidgets.QAction("Import")
+        self.import_vrayproxy_action = QtWidgets.QAction("Import VRay Proxy")
 
-        self.custom_actions["model"] = [
-            {
-                "action_object": model_action,
-                "action_callback": ""
-            },
-            {
-                "action_object": "separator",
-                "action_callback": ""
-            },
-            {
-                "action_object": after_action,
-                "action_callback": ""
-            }
-        ]
+        for std_library in lm.STD_LIBRARIES:
+            if std_library not in self.custom_actions.keys():
+                continue
 
-        self.custom_actions["material"] = [
-            {
-                "action_object": material_action,
-                "action_callback": ""
-            }
-        ]
+            action_data = [
+                {
+                    "action_object": self.import_action,
+                    "action_callback": partial(self.import_action_callback)
+                },
+                {
+                    "action_object": self.import_vrayproxy_action,
+                    "action_callback": partial(self.import_vrayproxy_action_callback),
+                    "action_asset_data_condition": "vrproxy_maya"
+                }
+            ]
+
+            self.custom_actions[std_library].extend(action_data)
 
         self.asset_browser.add_actions_to_menus(self.custom_actions)
 
     def create_widgets(self):
-        self.asset_browser = AssetBrowserWidget.AssetBrowserWidget()
+        self.asset_browser = AssetBrowserWidget.AssetBrowserWidget(dims=self.dims)
 
     def create_layout(self):
         central_widget = QtWidgets.QWidget(self)
@@ -86,34 +84,63 @@ class ExampleDialog(QtWidgets.QMainWindow):
         main_layout.addWidget(self.asset_browser)
 
     def create_connections(self):
+        pass
+
+    def create_custom_connections(self):
         connections = [
             {
                 "widget": "assets_tw",
                 "signal": "itemClicked",
-                "function": lambda: self.test_connection()
+                "function": ""
             }
         ]
 
         self.asset_browser.create_custom_connections(connections)
 
-    def create_custom_connections(self):
-        pass
-
     def custom_browser_setup(self):
-        self.create_custom_connections()
         self.create_custom_actions()
+        # self.create_custom_connections()
 
-    def test_connection(self):
-        print("hello")
+    def import_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        if not items:
+            return
+
+        current_library = items[0].library
+
+        if current_library in lm.STD_LIBRARIES:
+            for item in items:
+                if item.asset_data["maya_file"]:
+                    if not os.path.isfile(item.asset_data["maya_file"]):
+                        continue
+
+                    cmds.file(item.asset_data["maya_file"], i=True)
+
+    def import_vrayproxy_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        if not items:
+            return
+
+        current_library = items[0].library
+
+        if current_library in lm.STD_LIBRARIES:
+            for item in items:
+                if item.asset_data["vrproxy_maya"]:
+                    if not os.path.isfile(item.asset_data["vrproxy_maya"]):
+                        continue
+
+                    cmds.file(item.asset_data["vrproxy_maya"], i=True)
 
 
 def main():
     try:
-        cmds.deleteUI("ExampleDialog")
+        cmds.deleteUI("AssetBrowserWindow")
     except Exception:
         pass
 
-    dialog = ExampleDialog()
+    dialog = AssetBrowserWindow()
     dialog.show()
 
 
