@@ -112,6 +112,9 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
         if current_library in lm.STD_LIBRARIES:
             for item in items:
                 if item.asset_data["maya_file"]:
+                    if not os.path.isfile(item.asset_data["maya_file"]):
+                        continue
+
                     cmds.file(item.asset_data["maya_file"], i=True)
 
     def import_vrayproxy_action_callback(self):
@@ -124,11 +127,11 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
 
         if current_library in lm.STD_LIBRARIES:
             for item in items:
-                if item.asset_data["maya_file"]:
-                    if not os.path.isfile(item.asset_data["maya_file"]):
+                if item.asset_data["vrproxy_maya"]:
+                    if not os.path.isfile(item.asset_data["vrproxy_maya"]):
                         continue
 
-                    cmds.file(item.asset_data["maya_file"], i=True)
+                    cmds.file(item.asset_data["vrproxy_maya"], i=True)
 
 
 def main():
