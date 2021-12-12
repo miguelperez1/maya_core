@@ -25,6 +25,9 @@ class ExampleDialog(QtWidgets.QMainWindow):
 
         self.prefs_directory = cmds.internalVar(userPrefDir=True)
 
+        self.dims = (1920, 1080)
+        self.setMinimumSize(self.dims[0], self.dims[1])
+
         self.create_actions()
         self.create_widgets()
         self.create_layout()
@@ -33,8 +36,11 @@ class ExampleDialog(QtWidgets.QMainWindow):
     def create_actions(self):
         pass
 
+    def create_custom_actions(self):
+        pass
+
     def create_widgets(self):
-        self.asset_browser = AssetBrowserWidget.AssetBrowserWidget()
+        self.asset_browser = AssetBrowserWidget.AssetBrowserWidget(dims=self.dims)
 
     def create_layout(self):
         central_widget = QtWidgets.QWidget(self)
@@ -45,18 +51,18 @@ class ExampleDialog(QtWidgets.QMainWindow):
         main_layout.addWidget(self.asset_browser)
 
     def create_connections(self):
+        pass
+
+    def create_custom_connections(self):
         connections = [
             {
                 "widget": "assets_tw",
                 "signal": "itemClicked",
-                "function": lambda: self.test_connection()
+                "function": ""
             }
         ]
 
         self.asset_browser.create_custom_connections(connections)
-
-    def test_connection(self):
-        print("hello")
 
 
 def main():
