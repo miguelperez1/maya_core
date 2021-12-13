@@ -44,11 +44,9 @@ DEFAULT_CONNECTIONS = {
 #     'name': name,
 #     'material_type': material_type,
 #     'textures' : {
-#         'diffuse': {
-#             path: path,
-#             ptex: 0
-#         }
+#         'diffuse': path
 #     }
+# }
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)

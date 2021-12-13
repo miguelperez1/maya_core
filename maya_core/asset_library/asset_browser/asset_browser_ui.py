@@ -57,6 +57,7 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
 
         # STD Library Actions
         import_action = QtWidgets.QAction("Import")
+        reference_action = QtWidgets.QAction("Reference")
         import_vrayproxy_action = QtWidgets.QAction("Import VRay Proxy")
 
         # Light Library Actions
@@ -74,13 +75,20 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
                     "action_asset_data_conditions": ["maya_file"]
                 },
                 {
+                    "action_object": reference_action,
+                    "action_callback": partial(self.reference_action_callback),
+                    "action_asset_data_conditions": ["maya_file"]
+                },
+                {
                     "action_object": import_vrayproxy_action,
                     "action_callback": partial(self.import_vrayproxy_action_callback),
                     "action_asset_data_condition": ["vrproxy_maya"]
                 }
             ]
 
-            self.custom_actions[std_library].extend(action_datas)
+            for action_data in action_datas:
+                if action_data not in self.custom_actions[std_library]:
+                    self.custom_actions[std_library].append(action_data)
 
         studiolights_action_datas = [
             {
@@ -105,6 +113,8 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
     def create_widgets(self):
         self.asset_browser = AssetBrowserWidget.AssetBrowserWidget(dims=self.dims)
 
+        self.asset_browser.assets_tw.setColumnWidth(0, self.dims[0] * 0.125)
+
     def create_layout(self):
         central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(central_widget)
@@ -117,13 +127,7 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
         pass
 
     def create_custom_connections(self):
-        connections = [
-            {
-                "widget": "assets_tw",
-                "signal": "itemClicked",
-                "function": ""
-            }
-        ]
+        connections = []
 
         self.asset_browser.create_custom_connections(connections)
 
@@ -146,6 +150,22 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
                         continue
 
                     cmds.file(item.asset_data["maya_file"], i=True)
+
+    def reference_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        if not items:
+            return
+
+        current_library = items[0].library
+
+        if current_library in lm.STD_LIBRARIES:
+            for item in items:
+                if item.asset_data["maya_file"]:
+                    if not os.path.isfile(item.asset_data["maya_file"]):
+                        continue
+
+                    cmds.file(item.asset_data["maya_file"], r=True)
 
     def import_vrayproxy_action_callback(self):
         items = self.asset_browser.assets_tw.selectedItems()
