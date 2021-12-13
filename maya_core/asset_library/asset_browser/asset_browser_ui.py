@@ -56,19 +56,20 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
             if std_library not in self.custom_actions.keys():
                 continue
 
-            action_data = [
+            action_datas = [
                 {
                     "action_object": self.import_action,
-                    "action_callback": partial(self.import_action_callback)
+                    "action_callback": partial(self.import_action_callback),
+                    "action_asset_data_conditions": ["maya_file"]
                 },
                 {
                     "action_object": self.import_vrayproxy_action,
                     "action_callback": partial(self.import_vrayproxy_action_callback),
-                    "action_asset_data_condition": "vrproxy_maya"
+                    "action_asset_data_condition": ["vrproxy_maya"]
                 }
             ]
 
-            self.custom_actions[std_library].extend(action_data)
+            self.custom_actions[std_library].extend(action_datas)
 
         self.asset_browser.add_actions_to_menus(self.custom_actions)
 
