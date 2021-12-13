@@ -12,6 +12,7 @@ import pymel.core as pm
 from tools_core.asset_library.asset_browser import AssetBrowserWidget
 from maya_core.maya_pyqt import MWidgets
 from tools_core.asset_library import library_manager as lm
+from maya_core.pipeline.lighting.vray_lighting import vray_lighting
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
@@ -24,7 +25,10 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Asset Browser")
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
 
-        self.setObjectName("AssetBrowserWindow")
+        self.setObjectName("AssetBrowser")
+
+        app_icon = QtGui.QIcon(r"F:\share\tools\tools_core\tools_core\asset_library\asset_browser\icons\browser.png")
+        self.setWindowIcon(app_icon)
 
         self.prefs_directory = cmds.internalVar(userPrefDir=True)
 
@@ -49,8 +53,15 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
 
             self.custom_actions[library] = []
 
-        self.import_action = QtWidgets.QAction("Import")
-        self.import_vrayproxy_action = QtWidgets.QAction("Import VRay Proxy")
+        # Actions
+
+        # STD Library Actions
+        import_action = QtWidgets.QAction("Import")
+        import_vrayproxy_action = QtWidgets.QAction("Import VRay Proxy")
+
+        # Light Library Actions
+        create_vray_light_action = QtWidgets.QAction("Create Light")
+        create_vray_gobo_action = QtWidgets.QAction("Create VRay Gobo")
 
         for std_library in lm.STD_LIBRARIES:
             if std_library not in self.custom_actions.keys():
@@ -58,18 +69,36 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
 
             action_datas = [
                 {
-                    "action_object": self.import_action,
+                    "action_object": import_action,
                     "action_callback": partial(self.import_action_callback),
                     "action_asset_data_conditions": ["maya_file"]
                 },
                 {
-                    "action_object": self.import_vrayproxy_action,
+                    "action_object": import_vrayproxy_action,
                     "action_callback": partial(self.import_vrayproxy_action_callback),
                     "action_asset_data_condition": ["vrproxy_maya"]
                 }
             ]
 
             self.custom_actions[std_library].extend(action_datas)
+
+        studiolights_action_datas = [
+            {
+                "action_object": create_vray_light_action,
+                "action_callback": partial(self.create_vray_light_action_callback)
+            },
+        ]
+
+        self.custom_actions["studiolights"] = studiolights_action_datas
+
+        gobolights_action_datas = [
+            {
+                "action_object": create_vray_gobo_action,
+                "action_callback": partial(self.create_vray_gobo_action_callback)
+            }
+        ]
+
+        self.custom_actions["gobolights"] = gobolights_action_datas
 
         self.asset_browser.add_actions_to_menus(self.custom_actions)
 
@@ -134,10 +163,37 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
 
                     cmds.file(item.asset_data["vrproxy_maya"], i=True)
 
+    def create_vray_light_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        if not items:
+            return
+
+        for item in items:
+            if item.asset_data["asset_path"]:
+                if not os.path.isfile(item.asset_data["asset_path"]):
+                    continue
+
+                vray_lighting.create_vray_light("VRayLightRectShape", name=item.asset_data["asset_name"],
+                                                texture=item.asset_data["asset_path"])
+
+    def create_vray_gobo_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        if not items:
+            return
+
+        for item in items:
+            if item.asset_data["asset_path"]:
+                if not os.path.isfile(item.asset_data["asset_path"]):
+                    continue
+
+                vray_lighting.create_gobo(name=item.asset_data["asset_name"], texture=item.asset_data["asset_path"])
+
 
 def main():
     try:
-        cmds.deleteUI("AssetBrowserWindow")
+        cmds.deleteUI("AssetBrowser")
     except Exception:
         pass
 
