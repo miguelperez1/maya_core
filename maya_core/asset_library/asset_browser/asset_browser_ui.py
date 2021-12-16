@@ -13,6 +13,7 @@ from tools_core.asset_library.asset_browser import AssetBrowserWidget
 from maya_core.maya_pyqt import MWidgets
 from tools_core.asset_library import library_manager as lm
 from maya_core.pipeline.lighting.vray_lighting import vray_lighting
+from maya_core.pipeline.lookdev.material_builder import MaterialBuilder
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
@@ -97,7 +98,7 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
             },
         ]
 
-        self.custom_actions["studiolights"] = studiolights_action_datas
+        # self.custom_actions["StudioLights"] = studiolights_action_datas
 
         gobolights_action_datas = [
             {
@@ -106,7 +107,16 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
             }
         ]
 
-        self.custom_actions["gobolights"] = gobolights_action_datas
+        build_vray_material_action = QtWidgets.QAction("Build VRay Material")
+
+        self.custom_actions["Material"] = [
+            {
+                "action_object": build_vray_material_action,
+                "action_callback": partial(self.build_vray_material_action_callback)
+            }
+        ]
+
+        # self.custom_actions["gobolights"] = gobolights_action_datas
 
         self.asset_browser.add_actions_to_menus(self.custom_actions)
 
@@ -210,6 +220,17 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
 
                 vray_lighting.create_gobo(name=item.asset_data["asset_name"], texture=item.asset_data["asset_path"])
 
+    def build_vray_material_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        if not items:
+            return
+
+        for item in items:
+            if not item.asset_data["material_data"]:
+                continue
+
+            MaterialBuilder.build_material(item.asset_data["material_data"])
 
 def main():
     try:
