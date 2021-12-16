@@ -61,9 +61,7 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
         reference_action = QtWidgets.QAction("Reference")
         import_vrayproxy_action = QtWidgets.QAction("Import VRay Proxy")
 
-        # Light Library Actions
-        create_vray_light_action = QtWidgets.QAction("Create Light")
-        create_vray_gobo_action = QtWidgets.QAction("Create VRay Gobo")
+        # STD Library Actions
 
         for std_library in lm.STD_LIBRARIES:
             if std_library not in self.custom_actions.keys():
@@ -91,21 +89,27 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
                 if action_data not in self.custom_actions[std_library]:
                     self.custom_actions[std_library].append(action_data)
 
-        studiolights_action_datas = [
+        # StudioLights
+        create_vray_light_action = QtWidgets.QAction("Create Light")
+
+        self.custom_actions["StudioLights"] = [
             {
                 "action_object": create_vray_light_action,
                 "action_callback": partial(self.create_vray_light_action_callback)
             },
         ]
 
-        # self.custom_actions["StudioLights"] = studiolights_action_datas
+        # Cucoloris
+        create_vray_gobo_action = QtWidgets.QAction("Create VRay Gobo")
 
-        gobolights_action_datas = [
+        self.custom_actions["Cucoloris"] = [
             {
                 "action_object": create_vray_gobo_action,
                 "action_callback": partial(self.create_vray_gobo_action_callback)
             }
         ]
+
+        # Material
 
         build_vray_material_action = QtWidgets.QAction("Build VRay Material")
 
@@ -116,7 +120,14 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
             }
         ]
 
-        # self.custom_actions["gobolights"] = gobolights_action_datas
+        # HDR
+
+        self.custom_actions["HDR"] = [
+            {
+                "action_object": create_vray_light_action,
+                "action_callback": partial(self.create_vray_light_action_callback)
+            }
+        ]
 
         self.asset_browser.add_actions_to_menus(self.custom_actions)
 
@@ -204,8 +215,12 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
                 if not os.path.isfile(item.asset_data["asset_path"]):
                     continue
 
-                vray_lighting.create_vray_light("VRayLightRectShape", name=item.asset_data["asset_name"],
-                                                texture=item.asset_data["asset_path"])
+                if item.asset_data["asset_type"] == "StudioLights":
+                    vray_lighting.create_vray_light("VRayLightRectShape", name=item.asset_data["asset_name"],
+                                                    texture=item.asset_data["asset_path"])
+                elif item.asset_data["asset_type"] == "HDR":
+                    vray_lighting.create_vray_light("VRayLightDomeShape", name=item.asset_data["asset_name"],
+                                                    texture=item.asset_data["asset_path"])
 
     def create_vray_gobo_action_callback(self):
         items = self.asset_browser.assets_tw.selectedItems()
@@ -227,10 +242,11 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
             return
 
         for item in items:
-            if not item.asset_data["material_data"]:
+            if not item.asset_data["materials"]:
                 continue
 
-            MaterialBuilder.build_material(item.asset_data["material_data"])
+            MaterialBuilder.build_material(item.asset_data["materials"][0])
+
 
 def main():
     try:

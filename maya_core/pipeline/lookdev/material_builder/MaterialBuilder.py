@@ -55,8 +55,8 @@ logger.setLevel(10)
 class MaterialBuilder(object):
     def __init__(self, material_data):
         self.material_data = material_data
-        self.material_type = material_data['material_type']
-        self.name = material_data['name']
+        self.material_type = material_data['material_shader']
+        self.name = material_data['material_name']
 
     def build_material(self):
         build_method = getattr(self, "build_{}".format(self.material_type))
