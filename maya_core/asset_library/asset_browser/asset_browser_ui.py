@@ -14,6 +14,7 @@ from maya_core.maya_pyqt import MWidgets
 from tools_core.asset_library import library_manager as lm
 from maya_core.pipeline.lighting.vray_lighting import vray_lighting
 from maya_core.pipeline.lookdev.material_builder import MaterialBuilder
+from maya_core.pipeline.lookdev import lookdev_utils
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
@@ -81,7 +82,7 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
                 {
                     "action_object": import_vrayproxy_action,
                     "action_callback": partial(self.import_vrayproxy_action_callback),
-                    "action_asset_data_condition": ["vrproxy_maya"]
+                    "action_asset_data_conditions": ["vrproxy_maya"]
                 }
             ]
 
@@ -126,6 +127,17 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
             {
                 "action_object": create_vray_light_action,
                 "action_callback": partial(self.create_vray_light_action_callback)
+            }
+        ]
+
+        # Texture
+
+        create_texture_action = QtWidgets.QAction("Create Texture")
+
+        self.custom_actions["Texture"] = [
+            {
+                "action_object": create_texture_action,
+                "action_callback": partial(self.create_texture_action_callback)
             }
         ]
 
@@ -246,6 +258,18 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
                 continue
 
             MaterialBuilder.build_material(item.asset_data["materials"][0])
+
+    def create_texture_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        if not items:
+            return
+
+        for item in items:
+            if not item.asset_data["asset_path"]:
+                continue
+
+            lookdev_utils.create_texture(name=item.asset_data["asset_name"], path=item.asset_data["asset_path"])
 
 
 def main():
