@@ -161,3 +161,8 @@ def get_materials(node):
             materials[shading_group] = mats
 
     return materials
+
+
+def assign_material(mtl, nodes):
+    for node in nodes:
+        cmds.sets(str(node), edit=True, forceElement=str(mtl))

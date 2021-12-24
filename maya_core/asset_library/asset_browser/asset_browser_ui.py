@@ -61,6 +61,7 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
         import_action = QtWidgets.QAction("Import")
         reference_action = QtWidgets.QAction("Reference")
         import_vrayproxy_action = QtWidgets.QAction("Import VRay Proxy")
+        import_mesh_action = QtWidgets.QAction("Import as Mesh")
 
         # STD Library Actions
 
@@ -83,6 +84,11 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
                     "action_object": import_vrayproxy_action,
                     "action_callback": partial(self.import_vrayproxy_action_callback),
                     "action_asset_data_conditions": ["vrproxy_maya"]
+                },
+                {
+                    "action_object": import_mesh_action,
+                    "action_callback": partial(self.import_mesh_action_callback),
+                    "action_asset_data_conditions": ["mesh"]
                 }
             ]
 
@@ -270,6 +276,20 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
                 continue
 
             lookdev_utils.create_texture(name=item.asset_data["asset_name"], path=item.asset_data["asset_path"])
+
+    def import_mesh_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        if not items:
+            return
+
+        for item in items:
+            # Import mesh
+            pass
+
+            # Build material
+
+            # Assign materia
 
 
 def main():
