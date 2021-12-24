@@ -1,4 +1,5 @@
 import os
+import string
 import logging
 
 import pymel.core as pm
@@ -7,6 +8,10 @@ import maya.cmds as cmds
 logging.basicConfig()
 
 logger = logging.getLogger(__name__)
+
+MATERIAL_TYPES = [
+    "VRayMtl"
+]
 
 
 def create_texture(name=None, path=None, cc=True, uv=True, ptex=False):
@@ -32,7 +37,7 @@ def create_texture(name=None, path=None, cc=True, uv=True, ptex=False):
         pm.connectAttr(uv_node.outUV, texture_node.uvCoord)
 
     if cc:
-        cc_node = create_cc_node(texture_node)
+        cc_node = create_cc_node(source_node=texture_node)
         nodes['cc_node'] = cc_node
 
     if name:
@@ -52,7 +57,7 @@ def create_texture(name=None, path=None, cc=True, uv=True, ptex=False):
     return nodes
 
 
-def create_cc_node(source_node=None):
+def create_cc_node(name=None, source_node=None):
     # Create CC Node
     cc_node = pm.shadingNode('colorCorrect', asUtility=True)
 
@@ -79,7 +84,43 @@ def create_cc_node(source_node=None):
                 target_connection = connection_pair[-1]
                 pm.connectAttr(cc_node + "." + source_connection, target_connection, f=True)
 
+    if source_node and not name:
         pm.rename(cc_node, str(source_node) + "_CC")
+    elif name:
+        name = (name + "_CC") if not name.endswith("_CC") else name
+        cc_node.rename(name)
+
+    logger.info("Created %s", str(cc_node))
+
+    return cc_node
+
+
+def create_color_composite_node(name=None, source_a=None, source_b=None):
+    # Create CC Node
+    cc_node = pm.shadingNode('colorComposite', asUtility=True)
+
+    sources = [source_a, source_b]
+
+    # Connect gamma attributes
+    for i, source in enumerate(sources):
+        if not source:
+            continue
+
+        if not isinstance(source, pm.PyNode):
+            source = pm.PyNode(source)
+
+        # Connect to cc
+        if hasattr(source, "outColor"):
+            pm.connectAttr(source.outColor, getattr(cc_node, "color" + string.ascii_uppercase[i]))
+
+        if hasattr(source, "outAlpha"):
+            pm.connectAttr(source.outAlpha, getattr(cc_node, "alpha" + string.ascii_uppercase[i]))
+
+    if source_a and not name:
+        pm.rename(cc_node, str(source_a) + "_CComp")
+    elif name:
+        name = (name + "_CComp") if not name.endswith("_CComp") else name
+        cc_node.rename(name)
 
         logger.info("Created %s", str(cc_node))
 
@@ -116,49 +157,44 @@ def create_projection(name='', path='', comp=True):
 
 
 def get_materials_from_selection():
+    materials_tmp = {}
+
+    for c in pm.ls(sl=1):
+        sgs = pm.listConnections(c.getShape(), type="shadingEngine")
+
+        for sg in sgs:
+            mats = pm.listConnections(sg.surfaceShader, type=MATERIAL_TYPES)
+
+            if mats:
+                for mat in mats:
+                    if str(mat) not in materials_tmp.keys():
+                        materials_tmp[str(mat)] = mat
+
     materials = []
 
-    for obj in cmds.ls(sl=1, dag=1, s=1):
-        sgs = pm.listConnections(obj, type="shadingEngine")
-        for sg in sgs:
-            mats = pm.listConnections(sg.surfaceShader)
-            if pm.sets(sg, q=1):
-                if mats:
-                    materials.extend(mats)
+    for material, node in materials_tmp.items():
+        materials.append(node)
 
     return materials
 
 
-def get_materials_from_node(nodes=None):
-    materials = []
+def get_materials_from_node(node=None):
+    materials_tmp = {}
 
-    for obj in nodes:
-        sgs = pm.listConnections(obj, type="shadingEngine")
-        for sg in sgs:
-            mats = pm.listConnections(sg.surfaceShader)
-            if pm.sets(sg, q=1):
-                if mats:
-                    materials.extend(mats)
+    sgs = pm.listConnections(node.getShape(), type="shadingEngine")
 
-    return materials
+    for sg in sgs:
+        mats = pm.listConnections(sg.surfaceShader, type=MATERIAL_TYPES)
 
-
-def get_materials(node):
-    materials = {}
-
-    sgs = pm.listConnections(node, type="shadingEngine")
-
-    shading_group = None
-    if sgs:
-        shading_group = sgs[0]
-    else:
-        return
-
-    mats = pm.listConnections(shading_group.surfaceShader)
-
-    if pm.sets(shading_group, q=1):
         if mats:
-            materials[shading_group] = mats
+            for mat in mats:
+                if str(mat) not in materials_tmp.keys():
+                    materials_tmp[str(mat)] = mat
+
+    materials = []
+
+    for material, node in materials_tmp.items():
+        materials.append(node)
 
     return materials
 
@@ -166,3 +202,35 @@ def get_materials(node):
 def assign_material(mtl, nodes):
     for node in nodes:
         cmds.sets(str(node), edit=True, forceElement=str(mtl))
+
+
+def create_noise(name=None, cc=False, uv=True):
+    nodes = {}
+
+    noise_node = pm.shadingNode('noise', asTexture=True, isColorManaged=True)
+
+    nodes['texture_node'] = noise_node
+
+    if uv:
+        uv_node = pm.shadingNode("place2dTexture", asUtility=True)
+
+        nodes['uv_node'] = uv_node
+
+        pm.connectAttr(uv_node.outUV, noise_node.uvCoord)
+
+    if cc:
+        cc_node = create_cc_node(source_node=noise_node)
+        nodes['cc_node'] = cc_node
+
+    if name:
+        noise_node.rename(name + "_Noise")
+
+        if uv:
+            uv_node.rename(name + "_Noise_UV")
+
+        if cc:
+            cc_node.rename(name + "_Noise_CC")
+
+    logger.info("Created %s", str(noise_node))
+
+    return nodes

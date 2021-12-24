@@ -5,6 +5,8 @@ import logging
 import pymel.core as pm
 import maya.cmds as cmds
 
+from tools_core.pipeline.Asset import Asset
+
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
 
@@ -23,12 +25,11 @@ def create_node_struct(d, parent=None):
         logger.info("Created %s", str(p))
 
 
-class MayaAsset(object):
+class MayaAsset(Asset.Asset):
     def __init__(self, asset_data=None, node=None):
-        self.asset_data = asset_data
+        super(MayaAsset, self).__init__(asset_data=asset_data)
         self.world_node = node
-        self.world_path = os.path.join(asset_data["asset_path"], "01_build", "world_node",
-                                       asset_data["asset_name"] + ".ma")
+        self.maya_file = os.path.join(self.asset_root_path, self.asset_name + ".ma")
 
     def create_maya_asset_node(self):
         # Create Nodes
@@ -63,6 +64,11 @@ class MayaAsset(object):
         self.world_node.geoVis >> reverse.input.inputX
         reverse.output.outputX >> pm.PyNode("HiRes").visibility
         self.world_node.geoVis >> pm.PyNode("Proxy").visibility
+
+    def import_world_node(self):
+        cmds.file(self.world_node_path, i=1)
+        self.world_node = pm.PyNode(self.asset_name)
+        return self.world_node
 
     def apply_hair_cache(self, cache_path):
         pass

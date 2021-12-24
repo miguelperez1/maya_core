@@ -25,6 +25,7 @@ DEFAULT_CONNECTIONS = {
         'diffuse': 'outColor.color',
         'specular': 'outColor.reflectionColor',
         'gloss': 'outColorR.reflectionGlossiness',
+        'roughness': 'outColorR.reflectionGlossiness',
         'metal': 'outColorR.metalness',
         'opacity': 'outColor.opacityMap',
         'si': 'outColor.illumColor',
@@ -105,6 +106,9 @@ class MaterialBuilder(object):
                 pm.connectAttr(uv_node.outUV, tex_nodes['texture_node'].uvCoord)
 
             # Set default values
+            if tex_type == "roughness":
+                shader.useRoughness.set(1)
+
             if tex_type == "normal":
                 shader.bumpMapType.set(1)
 
