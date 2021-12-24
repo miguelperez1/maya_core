@@ -15,7 +15,7 @@ def create_displacement_node(name=None, disp_source=None, obj=None):
     cmds.vray("addAttributesFromGroup", str(disp_node), "vray_subquality", 1)
     cmds.vray("addAttributesFromGroup", str(disp_node), "vray_displacement", 1)
     disp_node.overrideGlobalDisplacement.set(1)
-    disp_node.vrayEdgeLength.set(1)
+    disp_node.vrayEdgeLength.set(4)
     disp_node.vrayMaxSubdivs.set(128)
     disp_node.vrayDisplacementShift.set(-0.5)
 

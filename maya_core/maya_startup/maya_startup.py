@@ -6,6 +6,7 @@ import pymel.core as pm
 
 logger = logging.getLogger(__name__)
 
+
 def set_render_settings():
     cmds.setAttr("defaultRenderGlobals.currentRenderer", "vray", type="string")
 
@@ -26,13 +27,16 @@ def set_render_settings():
 
     if cmds.objExists("persp"):
         camera = pm.PyNode("persp")
-        camera.nearClipPlane.set(.1)
+        camera.nearClipPlane.set(.01)
         camera.farClipPlane.set(100000)
 
 
 def startup_maya():
     mel.eval("loadPlugin vrayformaya")
+    mel.eval("loadPlugin lookdevKit")
     set_render_settings()
+
+    cmds.currentUnit(linear='m')
 
     logger.info("Maya startup completed")
 

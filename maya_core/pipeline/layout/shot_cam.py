@@ -34,4 +34,7 @@ def create_shot_cam():
 
     add_camera_shake(camera)
 
-    return pm.PyNode(camera)
+    cm = pm.PyNode(camera)
+    cm.nearClippingPlane.set(.01)
+
+    return cm
