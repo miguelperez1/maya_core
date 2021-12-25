@@ -141,7 +141,10 @@ def create_kitbash_asset(source_group_node, tags=None, preview_source=None):
 
         file_nodes = cu.filter_connected_nodes(mtl, "file")
 
-        mtl.reflectionColor.set(.7, .7, .7)
+        try:
+            mtl.reflectionColor.set(.7, .7, .7)
+        except Exception:
+            pass
 
         for file_node in file_nodes:
             file_name = os.path.basename(file_node.fileTextureName.get())
@@ -155,7 +158,10 @@ def create_kitbash_asset(source_group_node, tags=None, preview_source=None):
 
             # Add check if cc node already connected
             if not file_node.listConnections(et=1, t="colorCorrect"):
-                lookdev_utils.create_cc_node(source_node=file_node)
+                try:
+                    lookdev_utils.create_cc_node(source_node=file_node)
+                except Exception:
+                    pass
 
     # Export world node as master maya file
     pm.select(cl=1)
