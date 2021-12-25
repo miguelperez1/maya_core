@@ -25,11 +25,6 @@ def set_render_settings():
 
     mel.eval("updateRendererUI")
 
-    if cmds.objExists("persp"):
-        camera = pm.PyNode("persp")
-        camera.nearClipPlane.set(.01)
-        camera.farClipPlane.set(100000)
-
 
 def startup_maya():
     mel.eval("loadPlugin vrayformaya")
@@ -37,6 +32,7 @@ def startup_maya():
     set_render_settings()
 
     cmds.currentUnit(linear='m')
+    cmds.grid(default=True, spacing='1m', size='12m', divisions=12)
 
     logger.info("Maya startup completed")
 

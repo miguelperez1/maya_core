@@ -108,6 +108,27 @@ def create_kitbash_asset(source_group_node, tags=None, preview_source=None):
     # Import world node
     asset_world_node = new_asset.import_world_node()
 
+    # Create VRay Proxy
+    for c in source_group_node.listRelatives(c=1):
+        pm.select(cl=1)
+
+        # Duplicate mesh
+        d = c.duplicate()
+
+        pm.select(d)
+
+        model_path = os.path.join(new_asset.asset_root_path, "02_model")
+
+        v = cmds.vrayCreateProxy(createProxyNode=1, dir=os.path.join(model_path, "publish"),
+                                 fname=str(c) + ".vrmesh", node=str(c) + "_vrproxy", newProxyNode=1,
+                                 exportHierarchy=1, exportType=1, includeTransformation=1, makeBackup=1,
+                                 previewFaces=17500, previewType="clustering", lastSelectedAsPreview=1, pointSize=0.500,
+                                 vertexColorsOn=1, geomToLoad=3)[0]
+
+        pm.parent(v, "{}|Geometry|Constrain|Proxy".format(asset_name))
+
+        pm.select(cl=1)
+
     # Parent all geo under world node
     geo_node = pm.PyNode("|".join([str(new_asset.world_node), "Geometry", "Constrain", "HiRes", "GEO"]))
 
@@ -120,6 +141,8 @@ def create_kitbash_asset(source_group_node, tags=None, preview_source=None):
 
         file_nodes = cu.filter_connected_nodes(mtl, "file")
 
+        mtl.reflectionColor.set(.7, .7, .7)
+
         for file_node in file_nodes:
             file_name = os.path.basename(file_node.fileTextureName.get())
 
@@ -129,6 +152,10 @@ def create_kitbash_asset(source_group_node, tags=None, preview_source=None):
             if os.path.isfile(new_file_path):
                 file_node.fileTextureName.set(new_file_path)
                 logger.debug("Re-pathed %s", file_name)
+
+            # Add check if cc node already connected
+            if not file_node.listConnections(et=1, t="colorCorrect"):
+                lookdev_utils.create_cc_node(source_node=file_node)
 
     # Export world node as master maya file
     pm.select(cl=1)

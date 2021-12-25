@@ -40,15 +40,6 @@ DEFAULT_CONNECTIONS = {
     }
 }
 
-# Example material_data
-# material_data = {
-#     'name': name,
-#     'material_type': material_type,
-#     'textures' : {
-#         'diffuse': path
-#     }
-# }
-
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
 
