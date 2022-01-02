@@ -200,6 +200,9 @@ def get_materials_from_node(node=None):
 
 
 def assign_material(mtl, nodes):
+    if not isinstance(nodes, list):
+        nodes = [nodes]
+
     for node in nodes:
         cmds.sets(str(node), edit=True, forceElement=str(mtl))
 

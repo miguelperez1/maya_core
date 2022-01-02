@@ -119,11 +119,16 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
         # Material
 
         build_vray_material_action = QtWidgets.QAction("Build VRay Material")
+        build_and_assign_vray_material_action = QtWidgets.QAction("Build VRay Material and Assign")
 
         self.custom_actions["Material"] = [
             {
                 "action_object": build_vray_material_action,
                 "action_callback": partial(self.build_vray_material_action_callback)
+            },
+            {
+                "action_object": build_and_assign_vray_material_action,
+                "action_callback": partial(self.build_and_assign_vray_material_action_callback)
             }
         ]
 
@@ -263,7 +268,28 @@ class AssetBrowserWindow(QtWidgets.QMainWindow):
             if not item.asset_data["materials"]:
                 continue
 
-            MaterialBuilder.build_material(item.asset_data["materials"][0])
+            mtls = MaterialBuilder.build_material(item.asset_data["materials"][0])
+
+    def build_and_assign_vray_material_action_callback(self):
+        items = self.asset_browser.assets_tw.selectedItems()
+
+        selection = pm.ls(sl=1)
+
+        if not items:
+            return
+
+        for item in items:
+            if not item.asset_data["materials"]:
+                continue
+
+            mtls = MaterialBuilder.build_material(item.asset_data["materials"][0])
+
+            if not selection:
+                return
+
+            logger.debug(mtls)
+
+            lookdev_utils.assign_material(mtls[1], selection)
 
     def create_texture_action_callback(self):
         items = self.asset_browser.assets_tw.selectedItems()

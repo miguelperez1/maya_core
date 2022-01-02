@@ -32,12 +32,7 @@ DEFAULT_CONNECTIONS = {
         'normal': 'outColor.bumpMap',
         'displacement': 'outColor.displacementShader',
     },
-    'PxrSurface': {
-        'diffuse': 'color',
-        'specular': 'reflectionColor',
-        'gloss': 'reflectionGlossiness',
-        'normal': ''
-    }
+    'VRayMtl2Sided': {}
 }
 
 logger = logging.getLogger(__name__)
