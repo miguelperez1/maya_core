@@ -83,7 +83,7 @@ def build_megascan_model(asset_data):
         ns.normalize_scale(asset_data["scale"], mesh, axis="y")
 
     # Import world node
-    cmds.file(asset.world_path, i=True)
+    cmds.file(asset.world_node_path, i=True)
 
     # Parent mesh
     pm.parent(mesh, "GEO")
@@ -149,6 +149,9 @@ def build_megascan_model(asset_data):
 def main():
     mel.eval("loadPlugin vrayformaya")
     mel.eval("loadPlugin lookdevKit")
+
+    cmds.currentUnit(linear='m')
+    cmds.grid(default=True, spacing='1m', size='12m', divisions=12)
 
     json_file = open(sys.argv[1], "r")
     asset_data = json.load(json_file)

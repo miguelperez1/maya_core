@@ -33,6 +33,9 @@ def startup_maya():
 
     cmds.currentUnit(linear='m')
     cmds.grid(default=True, spacing='1m', size='12m', divisions=12)
+    
+    cmds.commandPort(name=":20220", sourceType="mel")
+    cmds.commandPort(name=":20221", sourceType="python")
 
     logger.info("Maya startup completed")
 

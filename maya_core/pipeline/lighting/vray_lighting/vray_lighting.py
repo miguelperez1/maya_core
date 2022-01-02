@@ -79,7 +79,7 @@ def create_vray_light(light_type, name=None, texture=None):
     return light_node
 
 
-def create_gobo(name, texture, directional=.975):
+def create_gobo(name, texture, directional=.985):
     gobo_light = create_vray_light("VRayLightRectShape", name, texture)
     gobo_light.directional.set(directional)
 
