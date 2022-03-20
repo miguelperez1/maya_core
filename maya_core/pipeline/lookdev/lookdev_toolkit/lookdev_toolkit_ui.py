@@ -1,5 +1,4 @@
 import logging
-from importlib import reload
 
 from PySide2 import QtCore
 from PySide2 import QtWidgets
@@ -12,7 +11,6 @@ from maya_core.maya_pyqt import MWidgets
 from maya_core.pipeline.lookdev import lookdev_utils
 from maya_core.pipeline.lookdev.vray_lookdev import vray_lookdev
 
-reload(lookdev_utils)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
