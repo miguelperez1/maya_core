@@ -37,6 +37,10 @@ def startup_maya():
     cmds.commandPort(name=":20220", sourceType="mel")
     cmds.commandPort(name=":20221", sourceType="python")
 
+    persp = pm.PyNode("persp")
+
+    persp.farClipPlane.set(1000000)
+
     logger.info("Maya startup completed")
 
 

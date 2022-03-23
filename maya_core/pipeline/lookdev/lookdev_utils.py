@@ -211,6 +211,7 @@ def create_noise(name=None, cc=False, uv=True):
     nodes = {}
 
     noise_node = pm.shadingNode('noise', asTexture=True, isColorManaged=True)
+    noise_node.noiseType.set(0)
 
     nodes['texture_node'] = noise_node
 
@@ -235,5 +236,6 @@ def create_noise(name=None, cc=False, uv=True):
             cc_node.rename(name + "_Noise_CC")
 
     logger.info("Created %s", str(noise_node))
+
 
     return nodes
