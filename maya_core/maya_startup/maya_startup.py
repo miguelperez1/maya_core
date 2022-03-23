@@ -17,7 +17,7 @@ def set_render_settings():
     vray_settings.aspectLock.set(0)
     vray_settings.width.set(1920)
     vray_settings.height.set(960)
-    vray_settings.aspectRatio.set(1920 / 960)
+    vray_settings.aspectRatio.set(1920 / 804)
     vray_settings.pixelAspect.set(1)
     vray_settings.rgbColorSpace.set(2)
     vray_settings.imageFormatStr.set("exr (multichannel)")

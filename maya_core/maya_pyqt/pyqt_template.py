@@ -8,6 +8,7 @@ import maya.cmds as cmds
 import pymel.core as pm
 
 from maya_core.maya_pyqt import MWidgets
+from tools_core.pyqt_commons import common_widgets as cw
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)

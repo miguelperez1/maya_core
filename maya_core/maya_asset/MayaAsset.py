@@ -1,11 +1,13 @@
 import os
 import json
 import logging
+from importlib import reload
 
 import pymel.core as pm
 import maya.cmds as cmds
 
 from tools_core.pipeline.Asset import Asset
+reload(Asset)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)

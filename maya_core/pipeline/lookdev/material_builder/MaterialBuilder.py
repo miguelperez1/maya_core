@@ -67,6 +67,9 @@ class MaterialBuilder(object):
         displacement = None
 
         for tex_type, tex_path in self.material_data['textures'].items():
+            if tex_type == "unknown":
+                continue
+
             use_ptex = tex_path.endswith(".tex")
 
             # create nodes
