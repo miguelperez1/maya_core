@@ -11,7 +11,6 @@ from maya_core.maya_pyqt import MWidgets
 from maya_core.pipeline.lookdev import lookdev_utils
 from maya_core.pipeline.lookdev.vray_lookdev import vray_lookdev
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
 
@@ -47,6 +46,7 @@ class LookdevToolKit(QtWidgets.QMainWindow):
         self.create_noise_btn = QtWidgets.QPushButton("Noise")
         self.create_distance_tex_btn = QtWidgets.QPushButton("VRay Distance Tex")
         self.create_dirt_btn = QtWidgets.QPushButton("VRay Dirt")
+        self.create_file_btn = QtWidgets.QPushButton("Create File")
 
     def create_layout(self):
         central_widget = QtWidgets.QWidget(self)
@@ -61,6 +61,7 @@ class LookdevToolKit(QtWidgets.QMainWindow):
         main_layout.addLayout(prefix_layout)
 
         main_layout.addWidget(self.material_builder_btn)
+        main_layout.addWidget(self.create_file_btn)
         main_layout.addWidget(self.create_cc_btn)
         main_layout.addWidget(self.create_color_composite_btn)
         main_layout.addWidget(self.create_noise_btn)
@@ -68,10 +69,14 @@ class LookdevToolKit(QtWidgets.QMainWindow):
         main_layout.addWidget(self.create_dirt_btn)
 
     def create_connections(self):
+        self.create_file_btn.clicked.connect(self.create_file_btn_callback)
         self.create_cc_btn.clicked.connect(self.create_cc_btn_callback)
         self.create_color_composite_btn.clicked.connect(self.create_color_composite_btn_callback)
         self.create_noise_btn.clicked.connect(self.create_noise_btn_callback)
         self.create_distance_tex_btn.clicked.connect(self.create_distance_tex_btn_callback)
+
+    def create_file_btn_callback(self):
+        lookdev_utils.create_texture(name=self.prefix_le.text())
 
     def create_cc_btn_callback(self):
         selection = pm.ls(sl=1)
