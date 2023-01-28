@@ -1,4 +1,5 @@
 import logging
+import importlib
 
 from PySide2 import QtCore
 from PySide2 import QtWidgets
@@ -10,9 +11,13 @@ import pymel.core as pm
 from maya_core.maya_pyqt import MWidgets
 from maya_core.pipeline.lookdev import lookdev_utils
 from maya_core.pipeline.lookdev.vray_lookdev import vray_lookdev
+from maya_core.pipeline.lookdev.maya_to_painter import maya_to_painter as mp
+from maya_core.pipeline.lookdev.material_builder import material_builder_ui
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
+
+importlib.reload(mp)
 
 
 class LookdevToolKit(QtWidgets.QMainWindow):
@@ -41,6 +46,8 @@ class LookdevToolKit(QtWidgets.QMainWindow):
         self.prefix_le = QtWidgets.QLineEdit()
 
         self.material_builder_btn = QtWidgets.QPushButton("Material Builder")
+        self.send_to_painter_btn = QtWidgets.QPushButton("Send to Painter")
+        self.smooth_painter_cb = QtWidgets.QCheckBox("smooth")
         self.create_cc_btn = QtWidgets.QPushButton("Color Correct")
         self.create_color_composite_btn = QtWidgets.QPushButton("Color Composite")
         self.create_noise_btn = QtWidgets.QPushButton("Noise")
@@ -61,6 +68,14 @@ class LookdevToolKit(QtWidgets.QMainWindow):
         main_layout.addLayout(prefix_layout)
 
         main_layout.addWidget(self.material_builder_btn)
+
+        painter_layout = QtWidgets.QHBoxLayout()
+        self.smooth_painter_cb.setContentsMargins(0,0,0,0)
+        painter_layout.addWidget(self.send_to_painter_btn)
+        painter_layout.addWidget(self.smooth_painter_cb)
+
+        main_layout.addLayout(painter_layout)
+
         main_layout.addWidget(self.create_file_btn)
         main_layout.addWidget(self.create_cc_btn)
         main_layout.addWidget(self.create_color_composite_btn)
@@ -69,11 +84,19 @@ class LookdevToolKit(QtWidgets.QMainWindow):
         main_layout.addWidget(self.create_dirt_btn)
 
     def create_connections(self):
+        self.material_builder_btn.clicked.connect(self.material_builder_btn_callback)
         self.create_file_btn.clicked.connect(self.create_file_btn_callback)
         self.create_cc_btn.clicked.connect(self.create_cc_btn_callback)
         self.create_color_composite_btn.clicked.connect(self.create_color_composite_btn_callback)
         self.create_noise_btn.clicked.connect(self.create_noise_btn_callback)
         self.create_distance_tex_btn.clicked.connect(self.create_distance_tex_btn_callback)
+        self.send_to_painter_btn.clicked.connect(self.send_to_painter_btn_callback)
+
+    def material_builder_btn_callback(self):
+        material_builder_ui.main()
+
+    def send_to_painter_btn_callback(self):
+        mp.send_to_painter(self.smooth_painter_cb.isChecked())
 
     def create_file_btn_callback(self):
         lookdev_utils.create_texture(name=self.prefix_le.text())

@@ -38,3 +38,5 @@ def create_shot_cam():
     cm.nearClipPlane.set(.01)
 
     return cm
+
+create_shot_cam()

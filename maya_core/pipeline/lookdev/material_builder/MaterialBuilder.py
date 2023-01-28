@@ -99,7 +99,7 @@ class MaterialBuilder(object):
                 shader.useRoughness.set(1)
 
             if tex_type == "normal":
-                shader.bumpMapType.set(1)
+                shader.bumpMapType.set(2)
 
         return shader, shading_group, displacement
 

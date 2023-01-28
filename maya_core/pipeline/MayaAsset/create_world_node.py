@@ -3,6 +3,7 @@ import sys
 import json
 import logging
 
+
 import maya.standalone as standalone
 
 standalone.initialize(name='python')
@@ -10,6 +11,13 @@ standalone.initialize(name='python')
 import maya.cmds as cmds
 import maya.mel as mel
 import pymel.core as pm
+
+sys.path.append("F:\\share\\tools\\tools_core")
+sys.path.append("F:\\share\\tools\\maya_core")
+
+from maya_core.maya_startup import maya_startup
+
+maya_startup.main()
 
 from maya_core.maya_asset import MayaAsset
 
