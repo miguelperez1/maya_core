@@ -32,7 +32,10 @@ DEFAULT_CONNECTIONS = {
         'normal': 'outColor.bumpMap',
         'displacement': 'outColor.displacementShader',
     },
-    'VRayMtl2Sided': {}
+    'VRayMtl2Sided': {},
+    "aiStandardSurface": {
+        'diffuse': 'outColor.baseColor'
+    }
 }
 
 logger = logging.getLogger(__name__)

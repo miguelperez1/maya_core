@@ -19,6 +19,15 @@ def maya_main_window():
     main_window_ptr = omui.MQtUtil.mainWindow()
     return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
 
+
+def get_maya_widget(widget_name):
+    widgets = {w.objectName(): w for w in QtWidgets.QApplication.allWidgets()}
+    if widget_name:
+        return widgets[widget_name]
+    else:
+        return widgets
+
+
 class CustomColorButton(QtWidgets.QWidget):
     color_changed = QtCore.Signal(QtGui.QColor)
     it_changed = QtCore.Signal()
@@ -160,4 +169,3 @@ class ColorPickerTreeWidgetItemWidget(QtWidgets.QWidget):
         color = (r, g, b)
         self.light.color.set(color)
         self.set_button_color(self.light.color.get())
-
